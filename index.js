@@ -34,7 +34,7 @@ function download(item, callback) {
         param = url.parse(item.url);
     try {
         var stat = fs.statSync(fileHeads);
-        if (stat.isFile() && (Date.now() - stat.mtime < 86400)) {
+        if (stat.isFile() && (Date.now() - stat.mtime < 86400000)) {
             // skip the file, as it was checked in the last 24 hours
             return callback();
         }
