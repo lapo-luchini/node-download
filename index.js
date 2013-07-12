@@ -33,6 +33,11 @@ function download(item, callback) {
         fileHeads = item.file + '.headers',
         param = url.parse(item.url);
     try {
+        var stat = fs.statSync(fileHeads);
+        if (stat.isFile() && (Date.now() - stat.mtime < 86400)) {
+            // skip the file, as it was checked in the last 24 hours
+            return callback();
+        }
         var prev = JSON.parse(fs.readFileSync(fileHeads));
         param.headers = param.headers || {};
         if (prev['last-modified'])
@@ -46,8 +51,12 @@ function download(item, callback) {
     try {
         (param.protocol == 'http:' ? http : https).get(param, function (response) {
             //console.log(response.statusCode + ' ' + item.file);
-            if (response.statusCode == 304)
+            if (response.statusCode == 304) {
+                // touch the headers file as we are just checked with the source
+                var now = new Date();
+                fs.utimesSync(fileHeads, now, now);
                 return callback();
+            }
             if (response.statusCode != 200)
                 return callback('HTTP error: ' + response.statusCode);
             var tmpFile = item.file + '.part',
