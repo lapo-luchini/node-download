@@ -70,7 +70,7 @@ function download(item, callback) {
             });
             disk.on('close', function () {
                 var delta = Date.now() - start;
-                if (response.headers['content-length'] != size) {
+                if ('content-length' in response.headers && response.headers['content-length'] != size) {
                     fs.unlinkSync(tmpFile);
                     callback('Wrong content length');
                 } else {
